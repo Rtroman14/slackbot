@@ -1,17 +1,22 @@
 require("dotenv").config();
 
-const { App } = require("@slack/bolt");
+const { WebClient } = require("@slack/web-api");
 
-const app = new App({
-    signingSecret: process.env.SLACK_SIGNING_SECRET,
-    token: process.env.SLACK_BOT_TOKEN,
-});
-
-/* Add functionality here */
+// Create a new instance of the WebClient class with the token read from your environment variable
+const web = new WebClient(process.env.SLACK_BOT_TOKEN);
+// The current date
+const currentTime = new Date().toTimeString();
 
 (async () => {
-    // Start the app
-    await app.start(process.env.PORT || 3000);
+    try {
+        // Use the `chat.postMessage` method to send a message from this app
+        await web.chat.postMessage({
+            channel: "#leadgen",
+            text: "Testing from inside @todo. Disregard this message.",
+        });
+    } catch (error) {
+        console.log(error);
+    }
 
-    console.log("⚡️ Bolt app is running!");
+    console.log("Message posted!");
 })();
