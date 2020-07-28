@@ -9,6 +9,12 @@ const app = new App({
 
 /* Add functionality here */
 
+// Listens to incoming messages that contain "hello"
+app.message("hello", async ({ message, say }) => {
+    // say() sends a message to the channel where the event was triggered
+    await say(`Hey there <@${message.user}>!`);
+});
+
 (async () => {
     // Start the app
     await app.start(process.env.PORT || 3000);
@@ -17,3 +23,5 @@ const app = new App({
 })();
 
 // https://slack-airtable-todo.herokuapp.com/
+// https://slack.dev/bolt-js/tutorial/getting-started
+// https://github.com/mattcreager/starbot/blob/master/src/index.js
