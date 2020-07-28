@@ -12,7 +12,32 @@ const app = new App({
 // Listens to incoming messages that contain "hello"
 app.message("hello", async ({ message, say }) => {
     // say() sends a message to the channel where the event was triggered
-    await say(`Hey there <@${message.user}>!`);
+    await say({
+        blocks: [
+            {
+                type: "section",
+                text: {
+                    type: "mrkdwn",
+                    text: `Hey there <@${message.user}>!`,
+                },
+                accessory: {
+                    type: "button",
+                    text: {
+                        type: "plain_text",
+                        text: "Click Me",
+                    },
+                    action_id: "button_click",
+                },
+            },
+        ],
+        text: `Hey there <@${message.user}>!`,
+    });
+});
+
+app.action("button_click", async ({ body, ack, say }) => {
+    // Acknowledge the action
+    await ack();
+    await say(`<@${body.user.id}> clicked the button`);
 });
 
 (async () => {
@@ -25,3 +50,4 @@ app.message("hello", async ({ message, say }) => {
 // https://slack-airtable-todo.herokuapp.com/
 // https://slack.dev/bolt-js/tutorial/getting-started
 // https://github.com/mattcreager/starbot/blob/master/src/index.js
+// https://slack.dev/bolt-js/concepts#commands
