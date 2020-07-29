@@ -1,6 +1,10 @@
 require("dotenv").config();
 
 const { App } = require("@slack/bolt");
+const readRecord = require("./src/readRecord");
+const createRecord = require("./src/createRecord");
+const updateRecord = require("./src/updateRecord");
+const deleteRecord = require("./src/deleteRecord");
 
 const app = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -38,6 +42,14 @@ app.action("button_click", async ({ body, ack, say }) => {
     // Acknowledge the action
     await ack();
     await say(`<@${body.user.id}> clicked the button`);
+});
+
+// The echo command simply echoes on command
+app.command("/todo", async ({ command, ack, say }) => {
+    // Acknowledge command request
+    await ack();
+
+    await say(`Added <${command.text}> to AirTable`);
 });
 
 (async () => {
