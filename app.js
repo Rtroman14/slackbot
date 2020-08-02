@@ -1,10 +1,14 @@
 require("dotenv").config();
 
 const { App } = require("@slack/bolt");
+const Airtable = require("airtable");
+
 const readRecord = require("./src/readRecord");
 const createRecord = require("./src/createRecord");
 const updateRecord = require("./src/updateRecord");
 const deleteRecord = require("./src/deleteRecord");
+
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base("appuT8iZkPUprzCaI");
 
 const app = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -49,7 +53,14 @@ app.command("/todo", async ({ command, ack, say }) => {
     // Acknowledge command request
     await ack();
 
-    await say(`Added <${command.text}> to AirTable`);
+    // CREATE RECORD
+    const record = {
+        TODO: command.text,
+    };
+
+    createRecord(base, "TODO", record);
+
+    await say(`Added "${command.text}" to AirTable`);
 });
 
 (async () => {

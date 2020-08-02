@@ -13,6 +13,7 @@
         "@slack/bolt": "^2.2.3",
         "@slack/events-api": "^2.3.3",
         "@slack/web-api": "^5.11.0",
+        "airtable": "^0.8.1",
         "dotenv": "^8.2.0"
     }
 }
