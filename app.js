@@ -17,50 +17,98 @@ const app = new App({
 
 /* Add functionality here */
 
-// Listens to incoming messages that contain "hello"
-app.message("hello", async ({ message, say }) => {
-    // say() sends a message to the channel where the event was triggered
-    await say({
-        blocks: [
-            {
-                type: "section",
-                text: {
-                    type: "mrkdwn",
-                    text: `Hey there <@${message.user}>!`,
-                },
-                accessory: {
-                    type: "button",
-                    text: {
-                        type: "plain_text",
-                        text: "Click Me",
-                    },
-                    action_id: "button_click",
-                },
-            },
-        ],
-        text: `Hey there <@${message.user}>!`,
-    });
-});
-
-app.action("button_click", async ({ body, ack, say }) => {
-    // Acknowledge the action
-    await ack();
-    await say(`<@${body.user.id}> clicked the button`);
-});
-
 // The echo command simply echoes on command
 app.command("/todo", async ({ command, ack, say }) => {
     // Acknowledge command request
     await ack();
 
-    // CREATE RECORD
-    const record = {
-        TODO: command.text,
-    };
+    try {
+        // CREATE RECORD
+        const record = {
+            TODO: command.text,
+        };
 
-    createRecord(base, "TODO", record);
+        createRecord(base, record);
 
-    await say(`Added "${command.text}" to AirTable`);
+        await say({
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "mrkdwn",
+                        text: `Added *${command.text}* to AirTable :heavy_check_mark:`,
+                    },
+                },
+            ],
+        });
+    } catch (error) {
+        console.log(`Error while creating todo -- ${error}`);
+
+        await say(`Error while creating todo`);
+    }
+});
+
+// The echo command simply echoes on command
+app.command("/todos", async ({ command, ack, say }) => {
+    // Acknowledge command request
+    await ack();
+
+    let todos = await readRecord(base);
+
+    let blocks = [];
+
+    todos.forEach((todo, index) => {
+        if (index !== 0) {
+            blocks.push({
+                type: "divider",
+            });
+        }
+        blocks.push({
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: todo.todo,
+            },
+            accessory: {
+                type: "button",
+                text: {
+                    type: "plain_text",
+                    text: "Done",
+                },
+                action_id: `btn`,
+                value: todo.id,
+            },
+        });
+    });
+
+    await say({
+        blocks: blocks,
+    });
+});
+
+app.action("btn", async ({ body, ack, say }) => {
+    // Acknowledge the action
+    await ack();
+    try {
+        let todoId = body.actions[0].value;
+        console.log(body.actions[0]);
+
+        // await deleteRecord(base, todoId);
+
+        await say({
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "mrkdwn",
+                        text: `Removed *${todoId}* from AirTable :heavy_check_mark:`,
+                    },
+                },
+            ],
+        });
+    } catch (error) {
+        console.log("Error while attempting to delete TODO.");
+    }
 });
 
 (async () => {
@@ -70,7 +118,4 @@ app.command("/todo", async ({ command, ack, say }) => {
     console.log("⚡️ Bolt app is running!");
 })();
 
-// https://slack-airtable-todo.herokuapp.com/
-// https://slack.dev/bolt-js/tutorial/getting-started
-// https://github.com/mattcreager/starbot/blob/master/src/index.js
-// https://slack.dev/bolt-js/concepts#commands
+// https://api.slack.com/legacy/message-buttons

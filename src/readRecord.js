@@ -1,28 +1,26 @@
-module.exports = (base, baseName, numRecords) => {
-    base(baseName)
+module.exports = async (base) => {
+    // If you only want the first page of records, you can
+    // use `firstPage` instead of `eachPage`.
+    let allTodos = [];
+
+    await base("TODO")
         .select({
-            // Selecting the first 3 records in Main View:
-            maxRecords: numRecords,
-            view: "Main View",
+            view: "Grid view",
+            filterByFormula: `NOT(Status = "Upcoming")`,
         })
-        .eachPage(
-            function page(records, fetchNextPage) {
-                // This function (`page`) will get called for each page of records.
+        .all()
+        .then((records) => {
+            records.map((record) => {
+                let todo = {};
+                todo.todo = record._rawJson.fields.TODO;
+                todo.id = record.id;
 
-                records.forEach((record) => {
-                    console.log(`Project = ${record.get("Name")} | ID = ${record.getId()}`);
-                });
+                allTodos.push(todo);
+            });
+        })
+        .catch((error) => {
+            console.log("Error retrieving todos", error);
+        });
 
-                // To fetch the next page of records, call `fetchNextPage`.
-                // If there are more records, `page` will get called again.
-                // If there are no more records, `done` will get called.
-                fetchNextPage();
-            },
-            function done(err) {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-            }
-        );
+    return allTodos;
 };

@@ -1,5 +1,5 @@
-module.exports = (base, projectName, record) => {
-    base(projectName).create(
+module.exports = (base, record) => {
+    base("TODO").create(
         [
             {
                 fields: record,

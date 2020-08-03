@@ -1,19 +1,26 @@
 {
     "name": "slackbot",
     "version": "1.0.0",
-    "description": "",
     "main": "app.js",
     "scripts": {
-        "start": "node app.js"
+        "start": "nodemon app.js"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
         "@slack/bolt": "^2.2.3",
-        "@slack/events-api": "^2.3.3",
-        "@slack/web-api": "^5.11.0",
         "airtable": "^0.8.1",
-        "dotenv": "^8.2.0"
-    }
+        "dotenv": "^8.2.0",
+        "nodemon": "^2.0.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Rtroman14/slackbot.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Rtroman14/slackbot/issues"
+    },
+    "homepage": "https://github.com/Rtroman14/slackbot#readme",
+    "description": ""
 }

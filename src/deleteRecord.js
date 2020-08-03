@@ -1,5 +1,5 @@
 module.exports = (base, ...ids) => {
-    base("Projects").destroy([...ids], function (err, deletedRecords) {
+    base("TODO").destroy([...ids], function (err, deletedRecords) {
         if (err) {
             console.error(err);
             return;
