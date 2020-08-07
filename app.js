@@ -19,10 +19,9 @@ const app = new App({
 
 // The echo command simply echoes on command
 app.command("/todo", async ({ command, ack, say }) => {
-    // Acknowledge command request
-    await ack();
-
     try {
+        // Acknowledge command request
+        await ack();
         // CREATE RECORD
         const record = {
             TODO: command.text,
@@ -48,48 +47,126 @@ app.command("/todo", async ({ command, ack, say }) => {
     }
 });
 
-// The echo command simply echoes on command
-app.command("/todos", async ({ command, ack, say }) => {
-    // Acknowledge command request
+// Listen for a slash command invocation
+app.command("/todos", async ({ ack, body, context }) => {
+    // Acknowledge the command request
     await ack();
-
-    let todos = await readRecord(base);
 
     let blocks = [];
 
-    todos.forEach((todo, index) => {
-        if (index !== 0) {
+    try {
+        let todos = await readRecord(base);
+
+        for (let i = 0; i < 5; i++) {
+            blocks.push({
+                type: "section",
+                text: {
+                    type: "mrkdwn",
+                    text: todos[i].todo,
+                },
+                accessory: {
+                    type: "button",
+                    text: {
+                        type: "plain_text",
+                        text: "Done!",
+                    },
+                    action_id: `todoDone`,
+                    value: todos[i].id,
+                },
+            });
             blocks.push({
                 type: "divider",
             });
+            if (i === 4) {
+                blocks.push({
+                    type: "input",
+                    element: {
+                        type: "plain_text_input",
+                    },
+                    label: {
+                        type: "plain_text",
+                        text: "Add TODO",
+                        emoji: true,
+                    },
+                });
+            }
         }
-        blocks.push({
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: todo.todo,
-            },
-            accessory: {
-                type: "button",
-                text: {
+    } catch (error) {
+        console.log("Error retrieving TODOs from AirTable ---", error);
+    }
+
+    try {
+        const result = await app.client.views.open({
+            token: context.botToken,
+            // Pass a valid trigger_id within 3 seconds of receiving it
+            trigger_id: body.trigger_id,
+            // View payload
+            view: {
+                type: "modal",
+                // View identifier
+                callback_id: "view_1",
+                title: {
                     type: "plain_text",
-                    text: "Done",
+                    text: "TODO List",
                 },
-                action_id: `btn`,
-                value: todo.id,
+                blocks: blocks,
+                submit: {
+                    type: "plain_text",
+                    text: "Submit",
+                },
             },
         });
-    });
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+    }
+});
 
-    await say({
-        blocks: blocks,
-    });
+// Listen for a button invocation with action_id `todoDone` (assume it's inside of a modal)
+app.action("todoDone", async ({ ack, body, context }) => {
+    // Acknowledge the button request
+    await ack();
+
+    try {
+        const result = await app.client.views.update({
+            token: context.botToken,
+            // Pass the view_id
+            view_id: body.view.id,
+            // View payload with updated blocks
+            view: {
+                type: "modal",
+                // View identifier
+                callback_id: "view_1",
+                title: {
+                    type: "plain_text",
+                    text: "TODO Done!",
+                },
+                blocks: [
+                    {
+                        type: "section",
+                        text: {
+                            type: "plain_text",
+                            text: "Way to go!!",
+                        },
+                    },
+                    {
+                        type: "image",
+                        image_url: "https://media.giphy.com/media/SVZGEcYt7brkFUyU90/giphy.gif",
+                        alt_text: "Yay! The modal was updated",
+                    },
+                ],
+            },
+        });
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 app.action("btn", async ({ body, ack, say }) => {
     // Acknowledge the action
-    await ack();
     try {
+        await ack();
         let todoId = body.actions[0].value;
         console.log(body.actions[0]);
 
@@ -101,7 +178,7 @@ app.action("btn", async ({ body, ack, say }) => {
                     type: "section",
                     text: {
                         type: "mrkdwn",
-                        text: `Removed *${todoId}* from AirTable :heavy_check_mark:`,
+                        text: `Removed "*${todoId}*" from AirTable :heavy_check_mark:`,
                     },
                 },
             ],
@@ -119,3 +196,4 @@ app.action("btn", async ({ body, ack, say }) => {
 })();
 
 // https://api.slack.com/legacy/message-buttons
+// https://slack.dev/bolt-js/concepts#creating-modals
