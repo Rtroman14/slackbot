@@ -5,7 +5,6 @@ const Airtable = require("airtable");
 
 const readRecord = require("./src/readRecord");
 const createRecord = require("./src/createRecord");
-const updateRecord = require("./src/updateRecord");
 const deleteRecord = require("./src/deleteRecord");
 
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base("appuT8iZkPUprzCaI");
@@ -57,7 +56,7 @@ app.command("/todos", async ({ ack, body, context }) => {
     try {
         let todos = await readRecord(base);
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < todos.length; i++) {
             blocks.push({
                 type: "section",
                 text: {
@@ -68,7 +67,7 @@ app.command("/todos", async ({ ack, body, context }) => {
                     type: "button",
                     text: {
                         type: "plain_text",
-                        text: "Done!",
+                        text: ":heavy_check_mark:",
                     },
                     action_id: `todoDone`,
                     value: todos[i].id,
@@ -80,15 +79,22 @@ app.command("/todos", async ({ ack, body, context }) => {
             if (i === 4) {
                 blocks.push({
                     type: "input",
+                    block_id: "block_input",
                     element: {
                         type: "plain_text_input",
+                        action_id: "input_id",
+                        placeholder: {
+                            type: "plain_text",
+                            text: "todo",
+                        },
                     },
                     label: {
                         type: "plain_text",
-                        text: "Add TODO",
+                        text: "What do you need to do?",
                         emoji: true,
                     },
                 });
+                break;
             }
         }
     } catch (error) {
@@ -104,7 +110,7 @@ app.command("/todos", async ({ ack, body, context }) => {
             view: {
                 type: "modal",
                 // View identifier
-                callback_id: "view_1",
+                callback_id: "modal",
                 title: {
                     type: "plain_text",
                     text: "TODO List",
@@ -116,9 +122,8 @@ app.command("/todos", async ({ ack, body, context }) => {
                 },
             },
         });
-        console.log(result);
     } catch (error) {
-        console.error(error);
+        console.log(error);
     }
 });
 
@@ -126,6 +131,14 @@ app.command("/todos", async ({ ack, body, context }) => {
 app.action("todoDone", async ({ ack, body, context }) => {
     // Acknowledge the button request
     await ack();
+
+    try {
+        let todoId = body.actions[0].value;
+
+        await deleteRecord(base, todoId);
+    } catch (error) {
+        console.log("Error while delete todo ---", error);
+    }
 
     try {
         const result = await app.client.views.update({
@@ -157,34 +170,29 @@ app.action("todoDone", async ({ ack, body, context }) => {
                 ],
             },
         });
-        console.log(result);
+        console.log("body -----", body);
     } catch (error) {
-        console.error(error);
+        console.log(error);
     }
 });
 
-app.action("btn", async ({ body, ack, say }) => {
-    // Acknowledge the action
+// Handle a view_submission event
+app.view("modal", async ({ ack, body, view, context }) => {
+    // Acknowledge the view_submission event
+    await ack();
+
+    let inputVal = body.view.state.values.block_input.input_id.value;
+
+    // CREATE RECORD
+    const record = {
+        TODO: inputVal,
+    };
+
+    createRecord(base, record);
+
     try {
-        await ack();
-        let todoId = body.actions[0].value;
-        console.log(body.actions[0]);
-
-        // await deleteRecord(base, todoId);
-
-        await say({
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: `Removed "*${todoId}*" from AirTable :heavy_check_mark:`,
-                    },
-                },
-            ],
-        });
     } catch (error) {
-        console.log("Error while attempting to delete TODO.");
+        console.log("Error while adding TODO ---", error);
     }
 });
 
@@ -195,5 +203,4 @@ app.action("btn", async ({ body, ack, say }) => {
     console.log("⚡️ Bolt app is running!");
 })();
 
-// https://api.slack.com/legacy/message-buttons
 // https://slack.dev/bolt-js/concepts#creating-modals
