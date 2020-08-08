@@ -85,7 +85,7 @@ app.command("/todos", async ({ ack, body, context }) => {
                         action_id: "input_id",
                         placeholder: {
                             type: "plain_text",
-                            text: "todo",
+                            text: "Add todo here",
                         },
                     },
                     label: {
@@ -132,6 +132,28 @@ app.action("todoDone", async ({ ack, body, context }) => {
     // Acknowledge the button request
     await ack();
 
+    const reactions = [
+        "https://media.giphy.com/media/87NS05bya11mg/giphy.gif",
+        "https://media.giphy.com/media/Is1O1TWV0LEJi/giphy.gif",
+        "https://media.giphy.com/media/doPrWYzSG1Vao/giphy.gif",
+        "https://media.giphy.com/media/hVJMypEGoupddzNFM9/giphy.gif",
+        "https://media.giphy.com/media/OmGtCYLH9uSd2/giphy.gif",
+        "https://media.giphy.com/media/yhekrBGjZhs2I/giphy.gif",
+        "https://media.giphy.com/media/3oz8xLAfBkbiO8Xzxe/giphy.gif",
+        "https://media.giphy.com/media/BlVnrxJgTGsUw/giphy.gif",
+        "https://media.giphy.com/media/RIuHHNa7UgFKo/giphy.gif",
+        "https://media.giphy.com/media/xUPGcJaL5ODxniWMNO/giphy.gif",
+        "https://media.giphy.com/media/JrvTJ3i6vnyuxanVa2/giphy.gif",
+        "https://media.giphy.com/media/rjkJD1v80CjYs/giphy.gif",
+        "https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",
+        "https://media.giphy.com/media/3oEdv03JAv74J6KGTS/giphy.gif",
+        "https://media.giphy.com/media/ddHhhUBn25cuQ/giphy.gif",
+        "https://media.giphy.com/media/aTwppoKsH6mpq/giphy.gif",
+        "https://media.giphy.com/media/LMtvnOIzinYp9l2vIH/giphy.gif",
+    ];
+
+    var reaction = reactions[Math.floor(Math.random() * reactions.length)];
+
     try {
         let todoId = body.actions[0].value;
 
@@ -156,15 +178,8 @@ app.action("todoDone", async ({ ack, body, context }) => {
                 },
                 blocks: [
                     {
-                        type: "section",
-                        text: {
-                            type: "plain_text",
-                            text: "Way to go!!",
-                        },
-                    },
-                    {
                         type: "image",
-                        image_url: "https://media.giphy.com/media/SVZGEcYt7brkFUyU90/giphy.gif",
+                        image_url: reaction,
                         alt_text: "Yay! The modal was updated",
                     },
                 ],
