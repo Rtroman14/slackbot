@@ -218,4 +218,4 @@ app.view("modal", async ({ ack, body, view, context }) => {
     console.log("⚡️ Bolt app is running!");
 })();
 
-// https://slack.dev/bolt-js/concepts#creating-modals
+// https://devcenter.heroku.com/articles/deploying-nodejs
