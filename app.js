@@ -220,6 +220,7 @@ app.error((error) => {
     // Start the app
     await app.start(process.env.PORT);
     // await app.start(process.env.PORT || 3000);
+    console.log("process.env.PORT =", process.env.PORT);
 
     console.log("⚡️ Bolt app is running!");
 })();
