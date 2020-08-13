@@ -211,6 +211,11 @@ app.view("modal", async ({ ack, body, view, context }) => {
     }
 });
 
+app.error((error) => {
+    // Check the details of the error to handle cases where you should retry sending a message or stop the app
+    console.log("There was an error ----", error);
+});
+
 (async () => {
     // Start the app
     await app.start(process.env.PORT || 3000);
